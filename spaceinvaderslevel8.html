@@ -1,0 +1,516 @@
+<html>
+	<head>
+		
+		<style>
+			canvas{
+				   border  : 1px solid black;
+				  }
+		</style>
+		
+		<canvas id="canvas" width="500" height="400" ></canvas>
+	
+		
+	</head>
+	<body>
+	
+		<script>
+			
+			// global variables 
+			var playerShip=null;
+			var bomb = null;
+			var playerBullet = null;
+			var randomBullet = null;
+			var bombs = new Array();
+			var playerBullets = new Array();
+			var num,i,j;
+			var randomBullets = new Array();
+			var randomX;
+			var boss = null;
+			
+			// global constants 
+			const canvas = document.getElementById("canvas");
+			const context = canvas.getContext('2d');
+			
+			// class that creates ships 
+			
+			class Ship{
+				
+				constructor(centerX,centerY,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+			}
+			
+			// class that creates bullets 
+				
+			class Bullet{
+				
+				constructor(centerX,centerY,speed,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._speed=speed;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set speed(newSpeed){
+					this._speed=speed;
+				
+				}
+				
+				get speed(){
+					return this._speed;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+				
+			
+			}
+			
+			// class that creates bombs
+				
+			class Bomb{
+				
+				constructor(centerX,centerY,speed,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._speed=speed;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set speed(newSpeed){
+					this._speed=speed;
+				
+				}
+				
+				get speed(){
+					return this._speed;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+				
+			
+			}
+			
+			// class that creates boss 
+			
+			class Boss{
+				
+				constructor(centerX,centerY,hits){
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hits=hits;
+					
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hits(newHits){
+					this._hits=newHits;
+				
+				}
+				
+				get hits(){
+					return this._hits;
+				
+				}
+			
+			}
+			
+			// respond to arrow key movement 
+			
+			document.addEventListener("keydown",function(event){
+				
+				// move left 
+				if(event.keyCode == 37){
+					
+					if(50<playerShip.centerX){
+						
+						playerShip.centerX-=50;
+					
+					}
+				}
+				
+				// move right
+				else if(event.keyCode == 39){
+					
+					if(playerShip.centerX<450){
+						
+						playerShip.centerX+=50;
+				
+					}
+				}
+				
+				// fire bullet with up key 
+				else if(event.keyCode == 38){
+					
+					// create new bullet object for player 
+					playerBullet = new Bullet(playerShip.centerX,playerShip.centerY-20,0.5,false);
+					playerBullets.push(playerBullet);
+						
+				}
+				
+			});
+		
+			// main function 
+			function init(){
+				
+				// create player ship 
+				playerShip = new Ship(250,380,false);
+				
+				// create boss ship 
+				boss = new Boss(250,100,0);
+				
+				// fire random bullet every second
+				setInterval(randomFire,1000);
+				
+				// fire random bomb every 2.25 seconds
+				setInterval(fireBomb,2250);
+				
+				// update boss position every second
+				setInterval(updateBossPos,1000);
+				
+				// update screen every 10 milliseconds 
+				setInterval(updateScreen,10);
+				
+				// delete any unwanted objects from memory every 10 milliseconds 
+				setInterval(deleteObjects,10);
+			}
+			
+			
+			function randomFire(){
+				
+				// generate random number from 50-450 indicating where to fire random bullet 
+				randomX = Math.floor(Math.random() * 450) + 50; 
+					
+				// create new random bullet object
+				randomBullet = new Bullet(randomX,-10,4,false);
+				randomBullets.push(randomBullet);
+					
+				
+			}
+			
+			function fireBomb(){
+			
+				// generate random number from 50-450 indicating where to fire random bullet 
+				randomX = Math.floor(Math.random() * 450) + 50; 
+				
+				// create new random bomb object
+				bomb = new Bomb(randomX,-10,1,false);
+				bombs.push(bomb);
+			}
+			
+			function updateBossPos(){
+				
+				// case when boss is not at edge of screen
+				if(50<boss.centerX && boss.centerX<450){
+					
+					// generate random number from 1-2 indicating which direction to move
+					num = Math.floor(Math.random() * 2) + 1;  
+					
+					// case when boss moves left 
+					if(num == 1){
+						boss.centerX-=50;
+					
+					}
+					
+					// case when boss moves right
+					else if(num == 2){
+						boss.centerX+=50;
+					
+					}
+				
+				}
+				
+				// case when boss is at left edge of screen
+				else if(boss.centerX == 50){
+					boss.centerX+=100;
+				
+				}
+				
+				// case when boss is at right edge of screen
+				else if(boss.centerX == 450){
+					boss.centerX-=100;
+				
+				}
+			
+			}
+			
+			function updateScreen(){
+				
+				// clear original screen
+				context.clearRect(0,0,canvas.width,canvas.height);
+				
+				// redraw background 
+				context.fillStyle="black";
+				context.fillRect(0,0,canvas.width,canvas.height);
+				
+				context.fillStyle="white";
+				
+				
+				if(!playerShip.hit){
+				
+					// draw player ship 
+					context.beginPath();
+					context.arc(playerShip.centerX,playerShip.centerY,20,0,2*Math.PI);
+					context.fill();
+					
+				}
+				
+				// draw player bullets 
+				for(i=0;i<=playerBullets.length-1;i++){
+					
+					if(!playerBullets[i].hit){
+					
+						// draw player bullet
+						context.beginPath();
+						context.arc(playerBullets[i].centerX,playerBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					
+					}
+					
+					// check if boss ship has been hit 
+					
+					if(((playerBullets[i].centerX - boss.centerX)**2) + ((playerBullets[i].centerY - boss.centerY)**2) < 625){
+						
+						// each bullet can only hit once 
+						if(!playerBullets[i].hit){
+						
+							playerBullets[i].hit = true;
+							boss.hits++;
+						}
+					}
+					
+					
+					
+					
+					// win condition 
+				
+					if(boss.hits == 250){
+						
+						window.open("spaceinvaderslevel7.html");
+					
+					}
+					
+					// update player bullet position 
+					playerBullets[i].centerY-=playerBullets[i].speed;
+					
+				}
+				
+				context.fillStyle="limegreen";
+				
+				// draw boss health bar 
+				context.fillRect(50,20,((250-boss.hits)/250)*400,20);
+				
+				// draw boss ship 
+				context.beginPath();
+				context.arc(boss.centerX,boss.centerY,25,0,2*Math.PI);
+				context.fill();
+				
+				context.fillStyle="red";
+				
+				// draw bombs
+				for(i=0;i<=bombs.length-1;i++){
+					
+					if(!bombs[i].hit){
+					
+						// draw bomb
+						context.beginPath();
+						context.arc(bombs[i].centerX,bombs[i].centerY,20,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit by bomb 
+					
+					if(((bombs[i].centerX - playerShip.centerX)**2) +((bombs[i].centerY - playerShip.centerY)**2) <= 1600){
+						
+						if(!bombs[i].hit){
+							
+							playerShip.hit=true;
+							location.reload();
+						}
+					}
+					
+					// update alien bullet position 
+					bombs[i].centerY+=bombs[i].speed;
+				
+				}
+				
+				context.fillStyle="limegreen";
+				
+				// draw random bullets 
+				for(i=0;i<=randomBullets.length-1;i++){
+					
+					if(!randomBullets[i].hit){
+					
+						// draw alien bullet
+						context.beginPath();
+						context.arc(randomBullets[i].centerX,randomBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit 
+					
+				
+					if(((randomBullets[i].centerX - playerShip.centerX)**2) +((randomBullets[i].centerY - playerShip.centerY)**2) <= 400){
+							
+						randomBullets[i].hit=true;
+						playerShip.hit=true;
+						
+						location.reload();
+					}
+	
+					
+					// update random bullet position 
+					randomBullets[i].centerY+=randomBullets[i].speed;
+				
+				}
+				
+		
+			}
+			
+			function deleteObjects(){
+				
+				// delete bombs that have exited the screen
+				for(i=0;i<=bombs.length-1;i++){
+				
+					if(bombs[i].centerY > 550){
+						
+						delete bombs[i].centerX;
+						delete bombs[i].centerY;
+						delete bombs[i].speed;
+						delete bombs[i].hit;
+					}
+				
+				}
+				
+				
+				// delete player bullets that have exited the screen
+				for(i=0;i<=playerBullets.length-1;i++){
+				
+					if(playerBullets[i].centerY < -50){
+						
+						delete playerBullets[i].centerX;
+						delete playerBullets[i].centerY;
+						delete playerBullets[i].speed;
+						delete playerBullets[i].hit;
+					}
+				
+				}
+			}
+			
+			// start game when window loads 
+			window.onload=init;
+			
+		</script>
+	</body>
+</html>

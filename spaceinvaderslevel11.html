@@ -1,0 +1,510 @@
+<html>
+	<head>
+		
+		<style>
+			canvas{
+				   border  : 1px solid black;
+				  }
+		</style>
+		
+		<canvas id="canvas" width="500" height="400" ></canvas>
+	
+		
+	</head>
+	<body>
+	
+		<script>
+			
+			// global variables 
+			var playerShip=null;
+			var playerBullet = null;
+			var alienBullet = null;
+			var randomBullet = null;
+			var alienBullets = new Array();
+			var playerBullets = new Array();
+			var num,i,j;
+			var randomBullets = new Array();
+			var randomX;
+			var boss = null;
+			var block= null;
+			var blocks= new Array();
+			
+			// global constants 
+			const canvas = document.getElementById("canvas");
+			const context = canvas.getContext('2d');
+			
+			// class that creates ships 
+			
+			class Ship{
+				
+				constructor(centerX,centerY,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+			}
+			
+			// class that creates bullets 
+				
+			class Bullet{
+				
+				constructor(centerX,centerY,speed,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._speed=speed;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set speed(newSpeed){
+					this._speed=speed;
+				
+				}
+				
+				get speed(){
+					return this._speed;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+				
+			
+			}
+			
+			// class that creates boss 
+			
+			class Boss{
+				
+				constructor(centerX,centerY,hits){
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hits=hits;
+					
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hits(newHits){
+					this._hits=newHits;
+				
+				}
+				
+				get hits(){
+					return this._hits;
+				
+				}
+			
+			}
+			
+			// class that creates blocks
+			class Block{
+			
+				constructor(centerX,centerY,destroyable,hit){
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._destroyable=destroyable;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				}
+				
+				get centerX(){
+					return this._centerX;
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				}
+				
+				get centerY(){
+					return this._centerY;
+				}
+				
+				set destroyable(newDestroyable){
+					this._destroyable=newDestroyable;
+				}
+				
+				get destroyable(){
+					return this._destroyable;
+				}
+				
+				set hit(newHit){
+					this._hit=newHit;
+				}
+				
+				get hit(){
+					return this._hit;
+				}
+			}
+			
+			// respond to arrow key movement 
+			
+			document.addEventListener("keydown",function(event){
+				
+				// move left 
+				if(event.keyCode == 37){
+					
+					if(50<playerShip.centerX){
+						
+						playerShip.centerX-=50;
+					
+					}
+				}
+				
+				// move right
+				else if(event.keyCode == 39){
+					
+					if(playerShip.centerX<450){
+						
+						playerShip.centerX+=50;
+				
+					}
+				}
+				
+				// fire bullet with up key 
+				else if(event.keyCode == 38){
+					
+					// create new bullet object for player 
+					playerBullet = new Bullet(playerShip.centerX,playerShip.centerY-20,0.5,false);
+					playerBullets.push(playerBullet);
+						
+				}
+				
+			});
+		
+			// main function 
+			function init(){
+				
+				// create player ship 
+				playerShip = new Ship(250,380,false);
+				
+				// create boss ship 
+				boss = new Boss(250,100,0);
+				
+				createWall();
+				
+				// give boss chance to charge every 25 seconds
+				setInterval(createWall,25000);
+				
+				// update boss position every second
+				setInterval(updateBossPos,1000);
+			
+				// update screen every 10 milliseconds 
+				setInterval(updateScreen,10);
+				
+				// delete any unwanted objects from memory every 10 milliseconds 
+				setInterval(deleteObjects,10);
+			}
+			
+			function createWall(){
+			
+				// generate random number from 1-9 indicating where to place the destroyable wall
+				num = Math.floor(Math.random() * 9) + 1; 
+				
+				if(num == 1){
+					randomX=50;
+				}
+				else if(num == 2){
+					randomX=100;
+				}
+				else if(num == 3){
+					randomX=150;
+				}
+				else if(num == 4){
+					randomX=200;
+				}
+				else if(num == 5){
+					randomX=250;
+				}
+				else if(num == 6){
+					randomX=300;
+				}
+				else if(num == 7){
+					randomX=350;
+				}
+				else if(num == 8){
+					randomX=400;
+				}
+				else if(num == 9){
+					randomX=450;
+				}
+				
+				// create new blocks 
+				for(i=50;i<=450;i+=50){
+					
+					if(i == randomX){
+						block = new Block(i,150,true,false);
+					}
+					else{
+						block = new Block(i,150,false,false);
+					}
+					blocks.push(block);
+				}
+			}
+			
+			function updateBossPos(){
+				
+				// case when boss is not at edge of screen
+				if(50<boss.centerX && boss.centerX<450){
+					
+					// generate random number from 1-2 indicating which direction to move
+					num = Math.floor(Math.random() * 2) + 1;  
+					
+					// case when boss moves left 
+					if(num == 1){
+						boss.centerX-=50;
+					
+					}
+					
+					// case when boss moves right
+					else if(num == 2){
+						boss.centerX+=50;
+					
+					}
+				
+				}
+				
+				// case when boss is at left edge of screen
+				else if(boss.centerX == 50){
+					boss.centerX+=100;
+				
+				}
+				
+				// case when boss is at right edge of screen
+				else if(boss.centerX == 450){
+					boss.centerX-=100;
+				
+				}
+			
+			}
+			
+			function updateScreen(){
+				
+				// clear original screen
+				context.clearRect(0,0,canvas.width,canvas.height);
+				
+				// redraw background 
+				context.fillStyle="black";
+				context.fillRect(0,0,canvas.width,canvas.height);
+				
+				context.fillStyle="white";
+				
+				
+				if(!playerShip.hit){
+				
+					// draw player ship 
+					context.beginPath();
+					context.arc(playerShip.centerX,playerShip.centerY,20,0,2*Math.PI);
+					context.fill();
+					
+				}
+				
+				// draw player bullets 
+				for(i=0;i<=playerBullets.length-1;i++){
+					
+					if(!playerBullets[i].hit){
+					
+						// draw player bullet
+						context.beginPath();
+						context.arc(playerBullets[i].centerX,playerBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					
+					}
+					
+					
+					// check if block bas been hit
+					for(j=0;j<=blocks.length-1;j++){
+						
+						if((playerBullets[i].centerX-blocks[j].centerX)**2 + (playerBullets[i].centerY-blocks[j].centerY)**2 <=1600 && blocks[j].destroyable && !blocks[j].hit){
+							
+							playerBullets[i].hit=true;
+							blocks[j].hit=true;
+							
+						}
+						
+						else if((playerBullets[i].centerX-blocks[j].centerX)**2 + (playerBullets[i].centerY-blocks[j].centerY)**2 <=1600 && !blocks[j].destroyable){
+							playerBullets[i].hit=true;
+				
+						}
+					}
+					
+					// check if boss ship has been hit 
+					
+					if(((playerBullets[i].centerX - boss.centerX)**2) + ((playerBullets[i].centerY - boss.centerY)**2) <625){
+						
+						// each bullet can only hit once 
+						if(!playerBullets[i].hit){
+						
+							playerBullets[i].hit = true;
+							boss.hits++;
+						}
+					}
+					
+					
+					// win condition 
+				
+					if(boss.hits == 325){
+						
+						window.open("spaceinvaderslevel9.html");
+					
+					}
+					
+					// update player bullet position 
+					playerBullets[i].centerY-=playerBullets[i].speed;
+					
+				}
+				
+				context.fillStyle="brown";
+				
+				// draw blocks
+				for(j=0;j<=blocks.length-1;j++){
+					
+					if(!blocks[j].hit){
+						
+						// draw blocks 
+						context.beginPath();
+						context.arc(blocks[j].centerX,blocks[j].centerY,20,0,2*Math.PI);
+						context.fill();
+						
+					}
+					
+					blocks[j].centerY+=0.3;
+				}
+				
+				context.fillStyle="limegreen";
+				
+				// draw boss ship 
+				context.beginPath();
+				context.arc(boss.centerX,boss.centerY,25,0,2*Math.PI);
+				context.fill();
+				
+				// draw boss health bar 
+				context.fillRect(50,20,((325-boss.hits)/325)*400,20);
+				
+				// case when player is killed by blocks 
+				for(j=0;j<=blocks.length-1;j++){
+				
+					if(Math.abs(blocks[j].centerX-playerShip.centerX)<20 && Math.abs(playerShip.centerY-blocks[j].centerY) <=40 && !blocks[j].hit){
+					
+						playerShip.hit=true;
+						location.reload();
+				
+					}
+				}
+			
+			}
+			
+			function deleteObjects(){
+				
+				// delete player bullets that have exited the screen
+				for(i=0;i<=playerBullets.length-1;i++){
+				
+					if(playerBullets[i].centerY < -50){
+						
+						delete playerBullets[i].centerX;
+						delete playerBullets[i].centerY;
+						delete playerBullets[i].speed;
+						delete playerBullets[i].hit;
+					}
+				
+				}
+				
+				// delete blocks that have exited the screen
+				for(i=0;i<=blocks.length-1;i++){
+				
+					if(blocks[i].centerY > 450){
+						
+						delete blocks[i].centerX;
+						delete blocks[i].centerY;
+						delete blocks[i].destroyable;
+						delete blocks[i].hit;
+					}
+				
+				}
+			}
+			
+			// start game when window loads 
+			window.onload=init;
+			
+		</script>
+	</body>
+</html>

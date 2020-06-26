@@ -1,0 +1,410 @@
+<html>
+	<head>
+		
+		<style>
+			canvas{
+				   border  : 1px solid black;
+				  }
+		</style>
+		
+		<canvas id="canvas" width="500" height="400" ></canvas>
+	
+		
+	</head>
+	<body>
+	
+		<script>
+			
+			// global variables 
+			var playerShip=null;
+			var alienShip=null;
+			var playerBullet = null;
+			var alienBullet = null;
+			var randomBullet = null;
+			var alienShips = new Array();
+			var alienBullets = new Array();
+			var playerBullets = new Array();
+			var num,i,j;
+			var randomBullets = new Array();
+			var randomX;
+			var numAliensHit = 0;
+			
+			// global constants 
+			const canvas = document.getElementById("canvas");
+			const context = canvas.getContext('2d');
+			
+			// class that creates ships 
+			
+			class Ship{
+				
+				constructor(centerX,centerY,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+			}
+			
+			// class that creates bullets 
+				
+			class Bullet{
+				
+				constructor(centerX,centerY,speed,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._speed=speed;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set speed(newSpeed){
+					this._speed=speed;
+				
+				}
+				
+				get speed(){
+					return this._speed;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+				
+			
+			}
+			
+			// respond to arrow key movement 
+			
+			document.addEventListener("keydown",function(event){
+				
+				// move left 
+				if(event.keyCode == 37){
+					
+					if(50<playerShip.centerX){
+						
+						playerShip.centerX-=50
+					
+					}
+				}
+				
+				// move right
+				else if(event.keyCode == 39){
+					
+					if(playerShip.centerX<450){
+						
+						playerShip.centerX+=50;
+				
+					}
+				}
+				
+				// fire bullet with up key 
+				else if(event.keyCode == 38){
+					
+					// create new bullet object for player 
+					playerBullet = new Bullet(playerShip.centerX,playerShip.centerY-20,0.5,false);
+					playerBullets.push(playerBullet);
+						
+				}
+				
+			});
+		
+			// main function 
+			function init(){
+				
+				// create player ship 
+				playerShip = new Ship(200,380,false);
+				
+				// create first row of alien ships 
+				for(i=1;i<=9;i++){
+					alienShip = new Ship(i*50,20,false);
+					alienShips.push(alienShip);
+				}
+				
+				// give alien ships chance to fire bullet every second 
+				setInterval(enemyFire,1000);
+				
+				// give screen chance to fire random bullet every half second 
+				setInterval(randomFire,500);
+				
+				// update screen every 10 milliseconds 
+				setInterval(updateScreen,10);
+				
+				// delete any unwanted objects from memory every 10 milliseconds 
+				setInterval(deleteObjects,10);
+			}
+			
+			function enemyFire(){
+				
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					// only fire when alien ships is not hit 
+					if(!alienShips[i].hit){
+					
+						// generate random number from 1-10 indicating wether or not to fire 
+						num = Math.floor(Math.random() * 10) + 1; 
+				
+						// case when alien ship fires 
+						if(num == 1){
+						
+							// create new bullet object for alien 
+							alienBullet = new Bullet(alienShips[i].centerX,alienShips[i].centerY+20,3,false);
+							alienBullets.push(alienBullet);
+				
+						}
+					}
+				}
+			}
+			
+			function randomFire(){
+			
+				// generate random number from 1-6 indicating wether or not to fire a random bullet
+				num = Math.floor(Math.random() * 6) + 1;  
+				
+				// case when random bullet fires 
+				if(num == 1){
+					
+					// generate random number from 50-450 indicating where to fire random bullet 
+					randomX = Math.floor(Math.random() * 450) + 50; 
+					
+					// create new random bullet object
+					randomBullet = new Bullet(randomX,-10,4,false);
+					randomBullets.push(randomBullet);
+				
+					}
+			}
+			
+			function updateScreen(){
+				
+				// clear original screen
+				context.clearRect(0,0,canvas.width,canvas.height);
+				
+				// redraw background 
+				context.fillStyle="black";
+				context.fillRect(0,0,canvas.width,canvas.height);
+				
+				context.fillStyle="white";
+				
+				if(!playerShip.hit){
+				
+					// draw player ship 
+					context.beginPath();
+					context.arc(playerShip.centerX,playerShip.centerY,20,0,2*Math.PI);
+					context.fill();
+					
+				}
+				
+				// draw player bullets 
+				for(i=0;i<=playerBullets.length-1;i++){
+					
+					if(!playerBullets[i].hit){
+					
+						// draw player bullet
+						context.beginPath();
+						context.arc(playerBullets[i].centerX,playerBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					
+					}
+					
+					// check if alien ship is hit 
+					for(j=0;j<=alienShips.length-1;j++){
+						
+						// case when alien ship is hit 
+						if(((playerBullets[i].centerX - alienShips[j].centerX)**2) +((playerBullets[i].centerY - alienShips[j].centerY)**2) <= 400 && !alienShips[j].hit && !playerBullets[i].hit){
+							
+							alienShips[j].hit=true;
+							playerBullets[i].hit=true;
+							numAliensHit++;
+							
+						}
+					}
+					
+					// win condition 
+				
+					if(numAliensHit == 9){
+						
+						window.open("spaceinvaderslevel2.html");
+					
+					}
+					
+					// update player bullet position 
+					playerBullets[i].centerY-=playerBullets[i].speed;
+					
+				}
+				
+				context.fillStyle="limegreen";
+				
+				// draw alien ships 
+		
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					if(!alienShips[i].hit){
+					
+						// draw alien ship 
+						context.beginPath();
+						context.arc(alienShips[i].centerX,alienShips[i].centerY,20,0,2*Math.PI);
+						context.fill();
+					}
+				
+				}
+				
+				// draw alien bullets 
+				for(i=0;i<=alienBullets.length-1;i++){
+					
+					if(!alienBullets[i].hit){
+					
+						// draw alien bullet
+						context.beginPath();
+						context.arc(alienBullets[i].centerX,alienBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit 
+					
+						
+					if(((alienBullets[i].centerX - playerShip.centerX)**2) +((alienBullets[i].centerY - playerShip.centerY)**2) <= 400){
+							
+						alienBullets[i].hit=true;
+						playerShip.hit=true;
+						
+						location.reload();
+					}
+	
+					
+					// update alien bullet position 
+					alienBullets[i].centerY+=alienBullets[i].speed;
+				
+				}
+				
+				// draw random bullets 
+				for(i=0;i<=randomBullets.length-1;i++){
+					
+					if(!randomBullets[i].hit){
+					
+						// draw alien bullet
+						context.beginPath();
+						context.arc(randomBullets[i].centerX,randomBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit 
+					
+						
+					if(((randomBullets[i].centerX - playerShip.centerX)**2) +((randomBullets[i].centerY - playerShip.centerY)**2) <= 400){
+							
+						randomBullets[i].hit=true;
+						playerShip.hit=true;
+						
+						location.reload();
+					}
+	
+					// update random bullet position 
+					randomBullets[i].centerY+=randomBullets[i].speed;
+				
+				}
+			}
+			
+			function deleteObjects(){
+				
+				// delete any alien ships that have been hit
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					if(alienShips[i].hit){
+						
+						delete alienShips[i].centerX;
+						delete alienShips[i].centerY;
+						delete alienShips[i].hit;
+					
+					}
+				}
+				
+				// delete player bullets that have exited the screen
+				for(i=0;i<=alienBullets.length-1;i++){
+				
+					if(alienBullets[i].centerY > 550){
+						
+						delete alienBullets[i].centerX;
+						delete alienBullets[i].centerY;
+						delete alienBullets[i].speed;
+						delete alienBullets[i].hit;
+					}
+				
+				}
+				
+				
+				// delete player bullets that have exited the screen
+				for(i=0;i<=playerBullets.length-1;i++){
+				
+					if(playerBullets[i].centerY < -50){
+						
+						delete playerBullets[i].centerX;
+						delete playerBullets[i].centerY;
+						delete playerBullets[i].speed;
+						delete playerBullets[i].hit;
+					}
+				
+				}
+			}
+			
+			// start game when window loads 
+			window.onload=init;
+			
+		</script>
+	</body>
+</html>

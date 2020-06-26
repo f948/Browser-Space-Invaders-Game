@@ -1,0 +1,533 @@
+<html>
+	<head>
+		
+		<style>
+			canvas{
+				   border  : 1px solid black;
+				  }
+		</style>
+		
+		<canvas id="canvas" width="500" height="400" ></canvas>
+	
+		
+	</head>
+	<body>
+	
+		<script>
+			
+			// global variables 
+			var playerShip=null;
+			var alienShip=null;
+			var playerBullet = null;
+			var alienBullet = null;
+			var randomBullet = null;
+			var alienShips = new Array();
+			var alienBullets = new Array();
+			var playerBullets = new Array();
+			var num,i,j;
+			var randomBullets = new Array();
+			var randomX;
+			var boss = null;
+			
+			// global constants 
+			const canvas = document.getElementById("canvas");
+			const context = canvas.getContext('2d');
+			
+			// class that creates ships 
+			
+			class Ship{
+				
+				constructor(centerX,centerY,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+			}
+			
+			// class that creates bullets 
+				
+			class Bullet{
+				
+				constructor(centerX,centerY,speed,hit){
+					
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._speed=speed;
+					this._hit=hit;
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set speed(newSpeed){
+					this._speed=speed;
+				
+				}
+				
+				get speed(){
+					return this._speed;
+				
+				}
+				
+				set hit(newHit){
+					this._hit=newHit
+				
+				}
+				
+				get hit(){
+					return this._hit;
+				
+				}
+				
+			
+			}
+			
+			// class that creates boss 
+			
+			class Boss{
+				
+				constructor(centerX,centerY,hits){
+					this._centerX=centerX;
+					this._centerY=centerY;
+					this._hits=hits;
+					
+				}
+				
+				set centerX(newCenterX){
+					this._centerX=newCenterX;
+				
+				}
+				
+				get centerX(){
+					return this._centerX;
+				
+				}
+				
+				set centerY(newCenterY){
+					this._centerY=newCenterY;
+				
+				}
+				
+				get centerY(){
+					return this._centerY;
+				
+				}
+				
+				set hits(newHits){
+					this._hits=newHits;
+				
+				}
+				
+				get hits(){
+					return this._hits;
+				
+				}
+			
+			}
+			
+			// respond to arrow key movement 
+			
+			document.addEventListener("keydown",function(event){
+				
+				// move left 
+				if(event.keyCode == 37){
+					
+					if(50<playerShip.centerX){
+						
+						playerShip.centerX-=50;
+					
+					}
+				}
+				
+				// move right
+				else if(event.keyCode == 39){
+					
+					if(playerShip.centerX<450){
+						
+						playerShip.centerX+=50;
+				
+					}
+				}
+				
+				// fire bullet with up key 
+				else if(event.keyCode == 38){
+					
+					// create new bullet object for player 
+					playerBullet = new Bullet(playerShip.centerX,playerShip.centerY-20,0.5,false);
+					playerBullets.push(playerBullet);
+						
+				}
+				
+			});
+		
+			// main function 
+			function init(){
+				
+				// create player ship 
+				playerShip = new Ship(250,380,false);
+				
+				// create boss ship 
+				boss = new Boss(250,100,0);
+				
+				// give alien ships chance to fire bullet every second 
+				setInterval(enemyFire,1000);
+				
+				// fire random bullet every second 
+				setInterval(randomFire,1000);
+				
+				// update boss position every second
+				setInterval(updateBossPos,1000);
+				
+				// gives boss a change to spawn new alien ships every 1 seconds
+				setInterval(spawnShips,1000);
+				
+				// update screen every 10 milliseconds 
+				setInterval(updateScreen,10);
+				
+				// update screen every 10 milliseconds 
+				setInterval(updateScreen,10);
+			}
+			
+			function enemyFire(){
+				
+				
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					// ship only fires when not hit 
+					if(!alienShips[i].hit){
+					
+						// generate random number from 1-9 indicating wether or not to fire 
+						num = Math.floor(Math.random() * 9) + 1; 
+			
+						// case when alien ship fires 
+						if(num == 1){
+						
+							// create new bullet object for alien 
+							alienBullet = new Bullet(alienShips[i].centerX,alienShips[i].centerY+20,1.25,false);
+							alienBullets.push(alienBullet);
+				
+						}
+					}
+				}
+			}
+			
+			function randomFire(){
+				
+				// generate random number from 50-450 indicating where to fire random bullet 
+				randomX = Math.floor(Math.random() * 450) + 50; 
+					
+				// create new random bullet object
+				randomBullet = new Bullet(randomX,-10,2,false);
+				randomBullets.push(randomBullet);
+				
+			}
+			
+			function spawnShips(){
+			
+				// determine wether boss will spawn new ships
+				num = Math.floor(Math.random() * 3) + 1; 
+				
+				// case when new ships are spawned
+				if(num == 1){
+				
+					// create new row of alien ships 
+					for(i=1;i<=9;i++){
+						alienShip = new Ship(i*50,170,false);
+						alienShips.push(alienShip);
+					}
+				}
+			}
+			
+			function updateBossPos(){
+				
+				// case when boss is not at edge of screen
+				if(50<boss.centerX && boss.centerX<450){
+					
+					// generate random number from 1-2 indicating which direction to move
+					num = Math.floor(Math.random() * 2) + 1;  
+					
+					// case when boss moves left 
+					if(num == 1){
+						boss.centerX-=50;
+					
+					}
+					
+					// case when boss moves right
+					else if(num == 2){
+						boss.centerX+=50;
+					
+					}
+				}
+				
+				// case when boss is at left edge of screen
+				else if(boss.centerX == 50){
+					boss.centerX+=100;
+				
+				}
+				
+				// case when boss is at right edge of screen
+				else if(boss.centerX == 450){
+					boss.centerX-=100;
+				
+				}
+			}
+			
+			function updateScreen(){
+				
+				// clear original screen
+				context.clearRect(0,0,canvas.width,canvas.height);
+				
+				// redraw background 
+				context.fillStyle="black";
+				context.fillRect(0,0,canvas.width,canvas.height);
+				
+				context.fillStyle="white";
+				
+				
+				if(!playerShip.hit){
+				
+					// draw player ship 
+					context.beginPath();
+					context.arc(playerShip.centerX,playerShip.centerY,20,0,2*Math.PI);
+					context.fill();
+					
+				}
+				
+				// draw player bullets 
+				for(i=0;i<=playerBullets.length-1;i++){
+					
+					if(!playerBullets[i].hit){
+					
+						// draw player bullet
+						context.beginPath();
+						context.arc(playerBullets[i].centerX,playerBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					
+					}
+					
+					// check if boss ship has been hit 
+					
+					if(((playerBullets[i].centerX - boss.centerX)**2) + ((playerBullets[i].centerY - boss.centerY)**2) < 2025){
+						
+						// each bullet can only hit once 
+						if(!playerBullets[i].hit){
+						
+							playerBullets[i].hit = true;
+							boss.hits++;
+						}
+					}
+					
+					// check if alien ship is hit 
+					for(j=0;j<=alienShips.length-1;j++){
+						
+						// case when alien ship is hit 
+						if(((playerBullets[i].centerX - alienShips[j].centerX)**2) +((playerBullets[i].centerY - alienShips[j].centerY)**2) <= 400 && !alienShips[j].hit && !playerBullets[i].hit){
+							
+							alienShips[j].hit=true;
+							playerBullets[i].hit=true;
+		
+							
+						}
+					}
+					
+					
+					// win condition 
+				
+					if(boss.hits == 150){
+						alert("You win");
+						location.reload();
+					
+					}
+					
+					// update player bullet position 
+					playerBullets[i].centerY-=playerBullets[i].speed;
+					
+				}
+				
+				context.fillStyle="limegreen";
+				
+				// draw boss ship 
+				context.beginPath();
+				context.arc(boss.centerX,boss.centerY,45,0,2*Math.PI);
+				context.fill();
+				
+				// draw boss health bar 
+				context.fillRect(50,20,((150-boss.hits)/150)*400,20);
+				
+				// draw alien ships 
+		
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					if(!alienShips[i].hit){
+					
+						// draw alien ship 
+						context.beginPath();
+						context.arc(alienShips[i].centerX,alienShips[i].centerY,20,0,2*Math.PI);
+						context.fill();
+					}
+				
+				}
+				
+				// draw alien bullets 
+				for(i=0;i<=alienBullets.length-1;i++){
+					
+					if(!alienBullets[i].hit){
+					
+						// draw alien bullet
+						context.beginPath();
+						context.arc(alienBullets[i].centerX,alienBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit 
+					
+					
+					if(((alienBullets[i].centerX - playerShip.centerX)**2) +((alienBullets[i].centerY - playerShip.centerY)**2) <= 400){
+							
+						alienBullets[i].hit=true;
+						playerShip.hit=true;
+						
+						location.reload();
+					}
+	
+					
+					// update alien bullet position 
+					alienBullets[i].centerY+=alienBullets[i].speed;
+				
+				}
+				
+				// draw random bullets 
+				for(i=0;i<=randomBullets.length-1;i++){
+					
+					if(!randomBullets[i].hit){
+					
+						// draw alien bullet
+						context.beginPath();
+						context.arc(randomBullets[i].centerX,randomBullets[i].centerY,2,0,2*Math.PI);
+						context.fill();
+					}
+					
+					// check if player ship is hit 
+					
+				
+					if(((randomBullets[i].centerX - playerShip.centerX)**2) +((randomBullets[i].centerY - playerShip.centerY)**2) <= 400){
+							
+						randomBullets[i].hit=true;
+						playerShip.hit=true;
+						
+						location.reload();
+					}
+					
+					
+					// update random bullet position 
+					randomBullets[i].centerY+=randomBullets[i].speed;
+				
+				}
+			}
+			
+			function deleteObjects(){
+				
+				// delete any alien ships that have been hit
+				for(i=0;i<=alienShips.length-1;i++){
+					
+					if(alienShips[i].hit){
+						
+						delete alienShips[i].centerX;
+						delete alienShips[i].centerY;
+						delete alienShips[i].hit;
+					
+					}
+				}
+				
+				// delete alien bullets that have exited the screen
+				for(i=0;i<=alienBullets.length-1;i++){
+				
+					if(alienBullets[i].centerY > 550){
+						
+						delete alienBullets[i].centerX;
+						delete alienBullets[i].centerY;
+						delete alienBullets[i].speed;
+						delete alienBullets[i].hit;
+					}
+				}
+				
+				
+				// delete player bullets that have exited the screen
+				for(i=0;i<=playerBullets.length-1;i++){
+				
+					if(playerBullets[i].centerY < -50){
+						
+						delete playerBullets[i].centerX;
+						delete playerBullets[i].centerY;
+						delete playerBullets[i].speed;
+						delete playerBullets[i].hit;
+					}
+				}
+				
+				// delete random bullets that have exited the screen
+				for(i=0;i<=randomBullets.length-1;i++){
+				
+					if(randomBullets[i].centerY < -50){
+						
+						delete randomBullets[i].centerX;
+						delete randomBullets[i].centerY;
+						delete randomBullets[i].speed;
+						delete randomBullets[i].hit;
+					}
+				}
+			}
+			
+			// start game when window loads 
+			window.onload=init;
+			
+		</script>
+	</body>
+</html>
