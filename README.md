@@ -4,8 +4,10 @@ Description: A space invaders like game in which players will control a ship tha
 
 # Required 
 A web browser that can run the html files 
+Notepad or Nodepad ++ installed
 
 # To make the code work
+Copy and paste the code from this repository into Nodepad and save the files with the same names as listed above
 Run the html files using your web browser
 
 # LICENSE:
