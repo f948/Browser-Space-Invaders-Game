@@ -5,7 +5,9 @@ Description: A space invaders like game in which players will control a ship tha
 # How to play the game 
 Use the left and right arrow keys to move your ship left to right and the up key to shoot.
 Your goal is to eliminate all the enemies on each level. 
+Once you have cleared all the enemies in each level you move on to the next level.
 Be careful through, since if you get hit even once you have to restart the level.
+NOTE: A large green bar at the top of the screen is the alien boss' health bar that shows how close you are to winning the level.
 
 # Required 
 A web browser that can run the html files 
