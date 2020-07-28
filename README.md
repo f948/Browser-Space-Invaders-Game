@@ -5,7 +5,7 @@ Description: A space invaders like game in which players will control a ship tha
 # How to play the game 
 Use the left and right arrow keys to move your ship left to right and the up key to shoot.
 Your goal is to eliminate all the enemies on each level. 
-Be careful since if you get hit even once you have to restart the level.
+Be careful through, since if you get hit even once you have to restart the level.
 
 # Required 
 A web browser that can run the html files 
